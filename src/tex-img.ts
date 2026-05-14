@@ -24,12 +24,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-//var AMTcgiloc = '';			//set to the URL of your LaTex renderer
-var noMathRender = false;
+const inBrowser = typeof document !== "undefined";
 
-(function() {
-var config = {
-  translateOnLoad: (typeof AMTcgiloc === 'string'),		  //true to autotranslate
+// `AMTcgiloc` is the URL of the LaTeX-to-image renderer. The original
+// distribution expected a host page to set it as a global before loading
+// the script. Read it lazily from `globalThis` so consumers can set it on
+// `window`/`globalThis` without producing a ReferenceError when it is absent.
+const getAMTcgiloc = (): string | undefined => (globalThis as any).AMTcgiloc;
+
+//var AMTcgiloc = '';			//set to the URL of your LaTex renderer
+const noMathRender = false;
+
+const config: any = {
+  translateOnLoad: (typeof getAMTcgiloc() === 'string'),		  //true to autotranslate
   mathcolor: "",       	      // defaults to back, or specify any other color
   displaystyle: true,         // puts limits above and below large operators
   showasciiformulaonhover: true, // helps students learn ASCIIMath
@@ -42,11 +49,11 @@ var config = {
   doubleblankmathdelimiter: false // if true,  x+1  is equal to `x+1`
 };                                // for IE this works only in <!--   -->
 
-var CONST = 0, UNARY = 1, BINARY = 2, INFIX = 3, LEFTBRACKET = 4,
+const CONST = 0, UNARY = 1, BINARY = 2, INFIX = 3, LEFTBRACKET = 4,
     RIGHTBRACKET = 5, SPACE = 6, UNDEROVER = 7, DEFINITION = 8,
     LEFTRIGHT = 9, TEXT = 10; // token types
 
-var AMsqrt = {input:"sqrt", tag:"msqrt", output:"sqrt", tex:null, ttype:UNARY},
+const AMsqrt: any = {input:"sqrt", tag:"msqrt", output:"sqrt", tex:null, ttype:UNARY},
   AMroot  = {input:"root", tag:"mroot", output:"root", tex:null, ttype:BINARY},
   AMfrac  = {input:"frac", tag:"mfrac", output:"/",    tex:null, ttype:BINARY},
   AMdiv   = {input:"/",    tag:"mfrac", output:"/",    tex:null, ttype:INFIX},
@@ -57,7 +64,7 @@ var AMsqrt = {input:"sqrt", tag:"msqrt", output:"sqrt", tex:null, ttype:UNARY},
   AMmbox  = {input:"mbox", tag:"mtext", output:"mbox", tex:null, ttype:TEXT},
   AMquote = {input:"\"",   tag:"mtext", output:"mbox", tex:null, ttype:TEXT};
 
-var AMsymbols = [
+const AMsymbols: any[] = [
 //some greek symbols
 {input:"alpha",  tag:"mi", output:"\u03B1", tex:null, ttype:CONST},
 {input:"beta",   tag:"mi", output:"\u03B2", tex:null, ttype:CONST},
@@ -363,7 +370,7 @@ function compareNames(s1,s2) {
   else return -1;
 }
 
-var AMnames = []; //list of input symbols
+const AMnames: string[] = []; //list of input symbols
 
 function AMinitSymbols() {
   var i;
@@ -539,9 +546,10 @@ I ::= S_S | S^S | S_S^S | S          Intermediate expression
 E ::= IE | I/I                       Expression
 Each terminal symbol is translated into a corresponding mathml node.*/
 
-var AMnestingDepth,AMpreviousSymbol,AMcurrentSymbol;
+let AMnestingDepth: number, AMpreviousSymbol: number, AMcurrentSymbol: number;
 
 function AMTgetTeXsymbol(symb) {
+	let pre: string;
 	if (typeof symb.val == "boolean" && symb.val) {
 		pre = '';
 	} else {
@@ -683,7 +691,7 @@ function AMTparseSexpr(str) { //parses str and returns [node,tailstr]
     str = AMremoveCharsAndBlanks(str,symbol.input.length);
     result = AMTparseExpr(str,false);
     AMnestingDepth--;
-    var st = "";
+    st = "";
     st = result[0].charAt(result[0].length -1);
 //alert(result[0].lastChild+"***"+st);
     if (st == "|" && str.charAt(0)!==config.listseparator) { // its an absolute value subterm
@@ -910,7 +918,7 @@ function AMparseMath(str) {
   }
   var texstring = AMTparseAMtoTeX(str);
 
-  if (typeof mathbg != "undefined" && mathbg=='dark') {
+  if (typeof (globalThis as any).mathbg != "undefined" && (globalThis as any).mathbg=='dark') {
 	  texstring = "\\reverse " + texstring;
   }
   if (config.mathcolor!="") {
@@ -929,7 +937,7 @@ function AMparseMath(str) {
   } else {
 	  texstring = escape(texstring);
   }
-  node.src = AMTcgiloc + '?' + texstring;
+  node.src = (getAMTcgiloc() ?? '') + '?' + texstring;
   node.style.verticalAlign = "middle";
   if (config.showasciiformulaonhover)                      //fixed by djhsu so newline
     node.setAttribute("title",str.replace(/\s+/g," "));//does not show in Gecko
@@ -1029,7 +1037,7 @@ function AMprocessNode(n, linebreaks, spanclassAM) {
   }
 }
 
-function translate(spanclassAM) {
+function translate(spanclassAM?: any) {
   if (!AMtranslated) { // run this only once
     AMtranslated = true;
     var body = document.getElementsByTagName("body")[0];
@@ -1038,23 +1046,40 @@ function translate(spanclassAM) {
   }
 }
 
-var AMbody;
-var AMtranslated = false;
-var AMnoMathML = true;
+let AMbody: any;
+let AMtranslated = false;
+const AMnoMathML = true;
 
 AMinitSymbols();
 
-window.translate = translate;
-window.AMTconfig = config;
-window.AMprocessNode = AMprocessNode;
-window.AMparseMath = AMparseMath;
-window.AMTparseMath = AMparseMath;
-window.AMTparseAMtoTeX = AMTparseAMtoTeX;
+if (inBrowser) {
+  document.addEventListener('DOMContentLoaded', function () {
+    if (config.translateOnLoad) {
+        translate();
+    }
+  });
+}
 
-document.addEventListener('DOMContentLoaded', function () {
-  if (config.translateOnLoad) {
-      translate();
-  }
-});
+export {
+  translate,
+  config as AMTconfig,
+  AMprocessNode,
+  AMparseMath,
+  AMparseMath as AMTparseMath,
+  AMTparseAMtoTeX,
+  newcommand,
+  newsymbol,
+};
 
-})();
+export const asciimathTexImg = {
+  translate,
+  AMTconfig: config,
+  AMprocessNode,
+  AMparseMath,
+  AMTparseMath: AMparseMath,
+  AMTparseAMtoTeX,
+  newcommand,
+  newsymbol,
+};
+
+export default asciimathTexImg;

@@ -3,24 +3,24 @@
 <head>
 <title>ASCIIMathML Live Test</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<script type="text/javascript" src="../ASCIIMathML.js"></script>
 <style type="text/css">
 #menu, #title, #subtitle, #author, .display { text-align: center; }
 body    { font-family: Arial; margin:10%; }
 p,table { font-family: Times; }
 table   { border-collapse:collapse; }
 td, th  { border:1px solid black; padding:5px; text-align:center; }
-img     { border: 0; } 
+img     { border: 0; }
 textarea { width: 100%; margin-bottom: 10px;}
 #out 	{ border: 1px solid #ccc; padding: 10px;}
 </style>
-<script type="text/javascript">
-function updatemath() {
+<script type="module">
+import { AMprocessNode } from "../dist/index.js";
+window.updatemath = function () {
 	var str = document.getElementById("mathin").value;
 	var outnode = document.getElementById("out");
 	outnode.innerHTML = str;
-	asciimath.AMprocessNode(outnode);
-}
+	AMprocessNode(outnode);
+};
 </script>
 </head>
 <body>

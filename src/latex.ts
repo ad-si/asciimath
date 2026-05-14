@@ -52,17 +52,18 @@ Or use absolute path names if the file is not in the same folder
 as your (X)HTML page.
 */
 
-(function () {
-var translateOnLoad = true;    //true to autotranslate
-var checkForMathML = true;   // check if browser can display MathML
-var notifyIfNoMathML = true; // display note if no MathML capability
-var alertIfNoMathML = false;  // show alert box if no MathML capability
+const inBrowser = typeof document !== "undefined";
+
+const translateOnLoad = true;    //true to autotranslate
+let checkForMathML = true;   // check if browser can display MathML
+const notifyIfNoMathML = true; // display note if no MathML capability
+const alertIfNoMathML = false;  // show alert box if no MathML capability
 // was "red":
-var mathcolor = "";	     // change it to "" (to inherit) or any other color
+const mathcolor = "";	     // change it to "" (to inherit) or any other color
 // was "serif":
-var mathfontfamily = "";      // change to "" to inherit (works in IE)
+const mathfontfamily = "";      // change to "" to inherit (works in IE)
                               // or another family (e.g. "arial")
-var showasciiformulaonhover = true; // helps students learn ASCIIMath
+const showasciiformulaonhover = true; // helps students learn ASCIIMath
 /*
 // Commented out by DRW -- not now used -- see DELIMITERS (twice) near the end
 var displaystyle = false;     // puts limits above and below large operators
@@ -73,11 +74,7 @@ var doubleblankmathdelimiter = false; // if true,  x+1  is equal to `x+1`
                                       // for IE this works only in <!--   -->
 //var separatetokens;// has been removed (email me if this is a problem)
 */
-var isIE = document.createElementNS==null;
-
-if (document.getElementById==null)
-  alert("This webpage requires a recent browser such as\
-\nMozilla/Netscape 7+ or Internet Explorer 6+MathPlayer")
+const isIE = inBrowser && (document.createElementNS as any) == null;
 
 // all further global variables start with "LM"
 
@@ -111,7 +108,7 @@ function LMisMathMLavailable() {
     else return LMnoMathMLNote();
   else if (navigator.appName.slice(0,9)=="Microsoft")
     try {
-        var ActiveX = new ActiveXObject("MathPlayer.Factory.1");
+        const ActiveX = new (window as any).ActiveXObject("MathPlayer.Factory.1");
         return null;
     } catch (e) {
         return LMnoMathMLNote();
@@ -120,17 +117,17 @@ function LMisMathMLavailable() {
 }
 
 // character lists for Mozilla/Netscape fonts
-    var LMcal = ["\uD835\uDC9C","\u212C","\uD835\uDC9E","\uD835\uDC9F","\u2130","\u2131","\uD835\uDCA2","\u210B","\u2110","\uD835\uDCA5","\uD835\uDCA6","\u2112","\u2133","\uD835\uDCA9","\uD835\uDCAA","\uD835\uDCAB","\uD835\uDCAC","\u211B","\uD835\uDCAE","\uD835\uDCAF","\uD835\uDCB0","\uD835\uDCB1","\uD835\uDCB2","\uD835\uDCB3","\uD835\uDCB4","\uD835\uDCB5","\uD835\uDCB6","\uD835\uDCB7","\uD835\uDCB8","\uD835\uDCB9","\u212F","\uD835\uDCBB","\u210A","\uD835\uDCBD","\uD835\uDCBE","\uD835\uDCBF","\uD835\uDCC0","\uD835\uDCC1","\uD835\uDCC2","\uD835\uDCC3","\u2134","\uD835\uDCC5","\uD835\uDCC6","\uD835\uDCC7","\uD835\uDCC8","\uD835\uDCC9","\uD835\uDCCA","\uD835\uDCCB","\uD835\uDCCC","\uD835\uDCCD","\uD835\uDCCE","\uD835\uDCCF"]; 
+    const LMcal: string[] = ["\uD835\uDC9C","\u212C","\uD835\uDC9E","\uD835\uDC9F","\u2130","\u2131","\uD835\uDCA2","\u210B","\u2110","\uD835\uDCA5","\uD835\uDCA6","\u2112","\u2133","\uD835\uDCA9","\uD835\uDCAA","\uD835\uDCAB","\uD835\uDCAC","\u211B","\uD835\uDCAE","\uD835\uDCAF","\uD835\uDCB0","\uD835\uDCB1","\uD835\uDCB2","\uD835\uDCB3","\uD835\uDCB4","\uD835\uDCB5","\uD835\uDCB6","\uD835\uDCB7","\uD835\uDCB8","\uD835\uDCB9","\u212F","\uD835\uDCBB","\u210A","\uD835\uDCBD","\uD835\uDCBE","\uD835\uDCBF","\uD835\uDCC0","\uD835\uDCC1","\uD835\uDCC2","\uD835\uDCC3","\u2134","\uD835\uDCC5","\uD835\uDCC6","\uD835\uDCC7","\uD835\uDCC8","\uD835\uDCC9","\uD835\uDCCA","\uD835\uDCCB","\uD835\uDCCC","\uD835\uDCCD","\uD835\uDCCE","\uD835\uDCCF"]; 
 
-    var LMfrk = ["\uD835\uDD04","\uD835\uDD05","\u212D","\uD835\uDD07","\uD835\uDD08","\uD835\uDD09","\uD835\uDD0A","\u210C","\u2111","\uD835\uDD0D","\uD835\uDD0E","\uD835\uDD0F","\uD835\uDD10","\uD835\uDD11","\uD835\uDD12","\uD835\uDD13","\uD835\uDD14","\u211C","\uD835\uDD16","\uD835\uDD17","\uD835\uDD18","\uD835\uDD19","\uD835\uDD1A","\uD835\uDD1B","\uD835\uDD1C","\u2128","\uD835\uDD1E","\uD835\uDD1F","\uD835\uDD20","\uD835\uDD21","\uD835\uDD22","\uD835\uDD23","\uD835\uDD24","\uD835\uDD25","\uD835\uDD26","\uD835\uDD27","\uD835\uDD28","\uD835\uDD29","\uD835\uDD2A","\uD835\uDD2B","\uD835\uDD2C","\uD835\uDD2D","\uD835\uDD2E","\uD835\uDD2F","\uD835\uDD30","\uD835\uDD31","\uD835\uDD32","\uD835\uDD33","\uD835\uDD34","\uD835\uDD35","\uD835\uDD36","\uD835\uDD37"];
+    const LMfrk: string[] = ["\uD835\uDD04","\uD835\uDD05","\u212D","\uD835\uDD07","\uD835\uDD08","\uD835\uDD09","\uD835\uDD0A","\u210C","\u2111","\uD835\uDD0D","\uD835\uDD0E","\uD835\uDD0F","\uD835\uDD10","\uD835\uDD11","\uD835\uDD12","\uD835\uDD13","\uD835\uDD14","\u211C","\uD835\uDD16","\uD835\uDD17","\uD835\uDD18","\uD835\uDD19","\uD835\uDD1A","\uD835\uDD1B","\uD835\uDD1C","\u2128","\uD835\uDD1E","\uD835\uDD1F","\uD835\uDD20","\uD835\uDD21","\uD835\uDD22","\uD835\uDD23","\uD835\uDD24","\uD835\uDD25","\uD835\uDD26","\uD835\uDD27","\uD835\uDD28","\uD835\uDD29","\uD835\uDD2A","\uD835\uDD2B","\uD835\uDD2C","\uD835\uDD2D","\uD835\uDD2E","\uD835\uDD2F","\uD835\uDD30","\uD835\uDD31","\uD835\uDD32","\uD835\uDD33","\uD835\uDD34","\uD835\uDD35","\uD835\uDD36","\uD835\uDD37"];
 
-    var LMbbb = ["\uD835\uDD38","\uD835\uDD39","\u2102","\uD835\uDD3B","\uD835\uDD3C","\uD835\uDD3D","\uD835\uDD3E","\u210D","\uD835\uDD40","\uD835\uDD41","\uD835\uDD42","\uD835\uDD43","\uD835\uDD44","\u2115","\uD835\uDD46","\u2119","\u211A","\u211D","\uD835\uDD4A","\uD835\uDD4B","\uD835\uDD4C","\uD835\uDD4D","\uD835\uDD4E","\uD835\uDD4F","\uD835\uDD50","\u2124","\uD835\uDD52","\uD835\uDD53","\uD835\uDD54","\uD835\uDD55","\uD835\uDD56","\uD835\uDD57","\uD835\uDD58","\uD835\uDD59","\uD835\uDD5A","\uD835\uDD5B","\uD835\uDD5C","\uD835\uDD5D","\uD835\uDD5E","\uD835\uDD5F","\uD835\uDD60","\uD835\uDD61","\uD835\uDD62","\uD835\uDD63","\uD835\uDD64","\uD835\uDD65","\uD835\uDD66","\uD835\uDD67","\uD835\uDD68","\uD835\uDD69","\uD835\uDD6A","\uD835\uDD6B"];
+    const LMbbb: string[] = ["\uD835\uDD38","\uD835\uDD39","\u2102","\uD835\uDD3B","\uD835\uDD3C","\uD835\uDD3D","\uD835\uDD3E","\u210D","\uD835\uDD40","\uD835\uDD41","\uD835\uDD42","\uD835\uDD43","\uD835\uDD44","\u2115","\uD835\uDD46","\u2119","\u211A","\u211D","\uD835\uDD4A","\uD835\uDD4B","\uD835\uDD4C","\uD835\uDD4D","\uD835\uDD4E","\uD835\uDD4F","\uD835\uDD50","\u2124","\uD835\uDD52","\uD835\uDD53","\uD835\uDD54","\uD835\uDD55","\uD835\uDD56","\uD835\uDD57","\uD835\uDD58","\uD835\uDD59","\uD835\uDD5A","\uD835\uDD5B","\uD835\uDD5C","\uD835\uDD5D","\uD835\uDD5E","\uD835\uDD5F","\uD835\uDD60","\uD835\uDD61","\uD835\uDD62","\uD835\uDD63","\uD835\uDD64","\uD835\uDD65","\uD835\uDD66","\uD835\uDD67","\uD835\uDD68","\uD835\uDD69","\uD835\uDD6A","\uD835\uDD6B"];
 
-var CONST = 0, UNARY = 1, BINARY = 2, INFIX = 3, LEFTBRACKET = 4,
+const CONST = 0, UNARY = 1, BINARY = 2, INFIX = 3, LEFTBRACKET = 4,
     RIGHTBRACKET = 5, SPACE = 6, UNDEROVER = 7, DEFINITION = 8,
     TEXT = 9, BIG = 10, LONG = 11, STRETCHY = 12, MATRIX = 13; // token types
 
-var LMsqrt = {input:"\\sqrt",	tag:"msqrt", output:"sqrt",	ttype:UNARY},
+const LMsqrt: any = {input:"\\sqrt",	tag:"msqrt", output:"sqrt",	ttype:UNARY},
   LMroot = {input:"\\root",	tag:"mroot", output:"root",	ttype:BINARY},
   LMfrac = {input:"\\frac",	tag:"mfrac", output:"/",	ttype:BINARY},
   LMover = {input:"\\stackrel", tag:"mover", output:"stackrel", ttype:BINARY},
@@ -146,7 +143,7 @@ var LMsqrt = {input:"\\sqrt",	tag:"msqrt", output:"sqrt",	ttype:UNARY},
 // Commented out by DRW so that " prints literally in equations
 // LMquote = {input:"\"",	 tag:"mtext", output:"mbox", ttype:TEXT};
 
-var LMsymbols = [
+const LMsymbols: any[] = [
 //Greek letters
 {input:"\\alpha",	tag:"mi", output:"\u03B1", ttype:CONST},
 {input:"\\beta",	tag:"mi", output:"\u03B2", ttype:CONST},
@@ -522,31 +519,28 @@ function compareNames(s1,s2) {
   else return -1;
 }
 
-var LMnames = []; //list of input symbols
+const LMnames: string[] = []; //list of input symbols
 
 function LMinitSymbols() {
   LMsymbols.sort(compareNames);
-  for (i=0; i<LMsymbols.length; i++) LMnames[i] = LMsymbols[i].input;
+  for (let i=0; i<LMsymbols.length; i++) LMnames[i] = LMsymbols[i].input;
 }
 
-var LMmathml = "http://www.w3.org/1998/Math/MathML";
+const LMmathml = "http://www.w3.org/1998/Math/MathML";
 
 function LMcreateElementMathML(t) {
   if (isIE) return document.createElement("m:"+t);
   else return document.createElementNS(LMmathml,t);
 }
 
-function LMcreateMmlNode(t,frag) {
-//  var node = LMcreateElementMathML(name);
-  if (isIE) var node = document.createElement("m:"+t);
-  else var node = document.createElementNS(LMmathml,t);
-  node.appendChild(frag);
+function LMcreateMmlNode(t: string, frag?: Node): Element {
+  const node: Element = isIE ? document.createElement("m:"+t) : document.createElementNS(LMmathml,t);
+  if (frag) node.appendChild(frag);
   return node;
 }
 
-function newcommand(oldstr,newstr) {
-  LMsymbols = LMsymbols.concat([{input:oldstr, tag:"mo", output:newstr,
-                                 ttype:DEFINITION}]);
+function newcommand(oldstr: string, newstr: string) {
+  LMsymbols.push({input:oldstr, tag:"mo", output:newstr, ttype:DEFINITION});
 }
 
 function LMremoveCharsAndBlanks(str,n) {
@@ -629,7 +623,7 @@ I ::= S_S | S^S | S_S^S | S	Intermediate expression
 E ::= IE | I/I			Expression
 Each terminal symbol is translated into a corresponding mathml node.*/
 
-var LMpreviousSymbol,LMcurrentSymbol;
+let LMpreviousSymbol: number, LMcurrentSymbol: number;
 
 function LMparseSexpr(str) { //parses str and returns [node,tailstr,(node)tag]
   var symbol, node, result, result2, i, st,// rightvert = false,
@@ -887,7 +881,7 @@ function LMparseSexpr(str) { //parses str and returns [node,tailstr,(node)tag]
             if (result[0].childNodes[i].nodeName=="mi" || result[0].nodeName=="mi") {
               st = (result[0].nodeName=="mi"?result[0].firstChild.nodeValue:
                               result[0].childNodes[i].firstChild.nodeValue);
-              var newst = [];
+              var newst: string = "";
               for (var j=0; j<st.length; j++)
 		if (st.charCodeAt(j)>64 && st.charCodeAt(j)<91) newst
 = newst +
@@ -1145,7 +1139,7 @@ function LMprocessNodeR(n, linebreaks) {
   return 0;
 }
 
-function LMprocessNode(n, linebreaks, spanclassLM) {
+function LMprocessNode(n: any, linebreaks: any, spanclassLM?: any) {
   var frag,st;
   if (spanclassLM!=null) {
     frag = document.getElementsByTagName("span")
@@ -1166,10 +1160,10 @@ function LMprocessNode(n, linebreaks, spanclassLM) {
   }
 }
 
-var LMbody;
-var LMnoMathML = false, LMtranslated = false;
+let LMbody: any;
+let LMnoMathML = false, LMtranslated = false;
 
-function translate(spanclassLM) {
+function translate(spanclassLM?: any) {
   if (!LMtranslated) { // run this only once
     LMtranslated = true;
     LMinitSymbols();
@@ -1191,62 +1185,30 @@ function LatexToMathML(LatexStr) {
     return span.innerHTML;
 }
 
-if (isIE) { // avoid adding MathPlayer info explicitly to each webpage
-  document.write("<object id=\"mathplayer\"\
-  classid=\"clsid:32F66A20-7614-11D4-BD11-00104BD3F987\"></object>");
-  document.write("<?import namespace=\"m\" implementation=\"#mathplayer\"?>");
-}
-
 // GO1.1 Generic onload by Brothercake
-// http://www.brothercake.com/
 //onload function (replaces the onload="translate()" in the <body> tag)
 function generic()
 {
     if (translateOnLoad)
         translate();
-};
-//setup onload function
-if(typeof window.addEventListener != 'undefined')
-{
-  //.. gecko, safari, konqueror and standard
+}
+
+if (inBrowser) {
   window.addEventListener('load', generic, false);
 }
-else if(typeof document.addEventListener != 'undefined')
-{
-  //.. opera 7
-  document.addEventListener('load', generic, false);
-}
-else if(typeof window.attachEvent != 'undefined')
-{
-  //.. win/ie
-  window.attachEvent('onload', generic);
-}
-//** remove this condition to degrade older browsers
-else
-{
-  //.. mac/ie5 and anything else that gets this far
-  //if there's an existing onload function
-  if(typeof window.onload == 'function')
-  {
-    //store it
-    var existing = onload;
-    //add new onload handler
-    window.onload = function()
-    {
-      //call existing onload function
-      existing();
-      //call generic onload function
-      generic();
-    };
-  }
-  else
-  {
-    //setup onload function
-    window.onload = generic;
-  }
-}
 
-//expose LatexToMathML function
-window.LatexToMathML = LatexToMathML;
+export {
+  translate,
+  LatexToMathML,
+  LMprocessNode,
+  newcommand,
+};
 
-})();
+export const latexmathml = {
+  translate,
+  LatexToMathML,
+  LMprocessNode,
+  newcommand,
+};
+
+export default latexmathml;

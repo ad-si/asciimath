@@ -1,4 +1,4 @@
-var unittests = [
+export const unittests = [
 //single symbol output
 {input: "!=", output:"<mo>≠</mo>"},
 {input: "!in", output:"<mo>∉</mo>"},
@@ -533,82 +533,3 @@ var unittests = [
 {input: "/4", output:"<mo>/</mo><mn>4</mn>"},
 {input: "lim_(x rarr 2^-) f(x)", output:"<munder><mo>lim</mo><mrow><mi>x</mi><mo>→</mo><msup><mn>2</mn><mo>−</mo></msup></mrow></munder><mrow><mi>f</mi><mrow><mo>(</mo><mi>x</mi><mo>)</mo></mrow></mrow>"},
 ];
-
-function htmlEntities(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-$(function() {
-	setTimeout(runTests, 100);
-	//setTimeout(generateSymbolTests, 100);
-});
-function runTests() {
-	$("#maketest").on('click', function() {
-		var txt = $("#newtest").val();
-		var out = $(asciimath.parseMath(txt)).find("mstyle").html().replace(/\\/g,"\\\\").replace(/"/g,'\\"');;
-		var outstr = '{input: "'+txt.replace(/\\/g,"\\\\").replace(/"/g,'\\"')+'", output:"'+out+'"},\n';
-		$("#newtestout").text($("#newtestout").text()+outstr);		
-	})
-	var res,tr,td,lastdec;
-	var tbody = document.getElementById("testout");
-	for (var i=0;i<unittests.length;i++) {
-		if (unittests[i].decimal !== undefined) {
-			asciimath.setdecimal(unittests[i].decimal);
-		}
-		if (unittests[i].list !== undefined) {
-			asciimath.setlistseparator(unittests[i].list);
-		}
-		res = asciimath.parseMath(unittests[i].input);
-		if (unittests[i].decimal !== undefined) {
-			asciimath.setdecimal(".");
-		}
-		if (unittests[i].list !== undefined) {
-			asciimath.setlistseparator(",");
-		}
-		tr = document.createElement("tr");
-		
-		td = document.createElement("td");
-		td.appendChild(document.createTextNode(unittests[i].input));
-		if (unittests[i].decimal !== undefined) {
-			td.appendChild(document.createTextNode(" (decimal='"+unittests[i].decimal+"')"));
-		}
-		if (unittests[i].list !== undefined) {
-			td.appendChild(document.createTextNode(" (list='"+unittests[i].list+"')"));
-		}
-		tr.appendChild(td);
-		
-		td = document.createElement("td");
-		td.appendChild(res);
-		tr.appendChild(td);
-		var outhtml = $(res).find("mstyle").html();
-		
-		td = document.createElement("td");
-		code = document.createElement("code");
-		code.appendChild(document.createTextNode(outhtml));
-		td.appendChild(code);
-		tr.appendChild(td);
-		
-		td = document.createElement("td");
-		code = document.createElement("code");
-		code.appendChild(document.createTextNode(unittests[i].output));
-		td.appendChild(code);
-		tr.appendChild(td);
-		
-		if (unittests[i].output == outhtml) {
-			tr.className = "success";
-		} else {
-			tr.className = "failed";
-		}
-		tbody.appendChild(tr);
-	}
-};
-
-function generateSymbolTests() {
-	var outhtml, res, outstr;
-	for (var i=0; i<asciimath.AMnames.length;i++) {
-		res = asciimath.parseMath(asciimath.AMnames[i]);
-		outhtml = $(res).find("mstyle").html().replace(/\\/g,"\\\\").replace(/"/g,'\\"');
-		outstr += '{input: "'+asciimath.AMnames[i].replace(/\\/g,"\\\\").replace(/"/g,'\\"')+'", output:"'+outhtml+'"},\n';
-	}
-	$("#newtestout").text(outstr);	
-}

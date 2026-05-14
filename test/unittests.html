@@ -1,39 +1,88 @@
 <!DOCTYPE html>
+<html>
 <head>
-<meta charset="utf-8" /> 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-<script type="text/javascript" src="../ASCIIMathML.js"></script>
-<script type="text/javascript" src="unittests.js"></script>
-<style type="text/css">
-.success {
-	background-color: #9f9;
-}
-.failed {
-	background-color: #f99;
-}
-.failed td {
-   border-left: 3px solid rgb(175, 0, 0);
-}
+<meta charset="utf-8" />
+<title>ASCIIMathML Unit Tests</title>
+<style>
+table { border-collapse: collapse; }
+th, td { border: 1px solid #ccc; padding: 4px 8px; vertical-align: top; }
+.success { background-color: #9f9; }
+.failed  { background-color: #f99; }
+.failed td { border-left: 3px solid rgb(175, 0, 0); }
+code { white-space: pre-wrap; }
 </style>
 </head>
 <body>
 <h1>ASCIIMathML Unit Tests</h1>
-<p>To create new tests, enter some ASCIIMath below and hit Math Test. Copy that into unittests.js, then run it
-to ensure it renders as expected.</p>
-<p>Create new test: 
-   <input type="text" size="20" id="newtest"/> 
-   <button type="button" id="maketest">Make Test</button></p>
+<p>To create new tests, enter some ASCIIMath below and hit <em>Make Test</em>. Copy the snippet into <code>unittests.js</code>, then reload this page.</p>
+<p>Create new test:
+  <input type="text" size="20" id="newtest" />
+  <button type="button" id="maketest">Make Test</button>
+</p>
 
 <pre id="newtestout"></pre>
 
 <h2>Running Existing Tests</h2>
 <table>
-<thead>
-<tr><th>Input</th><th>Rendered</th><th>Output</th><th>Expected Output</th></tr>
-</thead>
-<tbody id="testout">
-</tbody>
+  <thead>
+    <tr><th>Input</th><th>Rendered</th><th>Output</th><th>Expected Output</th></tr>
+  </thead>
+  <tbody id="testout"></tbody>
 </table>
+
+<script type="module">
+  import * as asciimath from "../dist/index.js";
+  import { unittests } from "./unittests.js";
+
+  const escapeForSnippet = (s) => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const renderToHtml = (root) => root.querySelector("mstyle")?.innerHTML ?? "";
+
+  document.getElementById("maketest").addEventListener("click", () => {
+    const txt = document.getElementById("newtest").value;
+    const out = renderToHtml(asciimath.parseMath(txt));
+    const line = `{input: "${escapeForSnippet(txt)}", output:"${escapeForSnippet(out)}"},\n`;
+    const pre = document.getElementById("newtestout");
+    pre.textContent = pre.textContent + line;
+  });
+
+  const tbody = document.getElementById("testout");
+  for (const tc of unittests) {
+    if (tc.decimal !== undefined) asciimath.setdecimal(tc.decimal);
+    if (tc.list !== undefined) asciimath.setlistseparator(tc.list);
+    const res = asciimath.parseMath(tc.input);
+    if (tc.decimal !== undefined) asciimath.setdecimal(".");
+    if (tc.list !== undefined) asciimath.setlistseparator(",");
+
+    const tr = document.createElement("tr");
+
+    const tdInput = document.createElement("td");
+    let label = tc.input;
+    if (tc.decimal !== undefined) label += ` (decimal='${tc.decimal}')`;
+    if (tc.list !== undefined) label += ` (list='${tc.list}')`;
+    tdInput.textContent = label;
+    tr.appendChild(tdInput);
+
+    const tdRendered = document.createElement("td");
+    tdRendered.appendChild(res);
+    tr.appendChild(tdRendered);
+
+    const outhtml = renderToHtml(res);
+
+    const tdOut = document.createElement("td");
+    const codeOut = document.createElement("code");
+    codeOut.textContent = outhtml;
+    tdOut.appendChild(codeOut);
+    tr.appendChild(tdOut);
+
+    const tdExp = document.createElement("td");
+    const codeExp = document.createElement("code");
+    codeExp.textContent = tc.output;
+    tdExp.appendChild(codeExp);
+    tr.appendChild(tdExp);
+
+    tr.className = tc.output === outhtml ? "success" : "failed";
+    tbody.appendChild(tr);
+  }
+</script>
 </body>
 </html>
-

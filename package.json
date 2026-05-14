@@ -1,0 +1,72 @@
+{
+  "name": "asciimath",
+  "version": "0.0.1",
+  "description": "Convert ASCII math notation (and some LaTeX) to Presentation MathML in the browser.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Peter Jipsen and contributors",
+  "homepage": "https://asciimath.org/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asciimath/asciimathml.git"
+  },
+  "bugs": {
+    "url": "https://github.com/asciimath/asciimathml/issues"
+  },
+  "keywords": [
+    "asciimath",
+    "asciimathml",
+    "mathml",
+    "math",
+    "latex",
+    "mathjax"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./latex": {
+      "types": "./dist/latex.d.ts",
+      "import": "./dist/latex.js"
+    },
+    "./tex-img": {
+      "types": "./dist/tex-img.d.ts",
+      "import": "./dist/tex-img.js"
+    },
+    "./mathjax": {
+      "types": "./dist/mathjax.d.ts",
+      "import": "./dist/mathjax.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE",
+    "AUTHORS.MD"
+  ],
+  "sideEffects": [
+    "./dist/index.js",
+    "./dist/latex.js",
+    "./dist/tex-img.js",
+    "./dist/mathjax.js"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "serve": "npm run build && miniserve --index test/index.html .",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

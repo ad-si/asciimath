@@ -38,7 +38,13 @@ import "asciimath";
 ### Programmatic API
 
 ```js
-import { parseMath, translate, AMprocessNode, newcommand } from "asciimath";
+import {
+  parseMath,
+  translate,
+  AMprocessNode,
+  newcommand,
+  newsymbol,
+} from "asciimath";
 
 // Convert a string to a MathML <math> Node.
 const mathNode = parseMath("sum_(i=1)^n i = n(n+1)/2");
@@ -49,14 +55,39 @@ AMprocessNode(document.getElementById("content"), false);
 
 // Define a custom macro.
 newcommand("RR", "\\mathbb{R}");
+
+// Or register a brand-new symbol with its own MathML mapping.
+newsymbol({ input: "lub", tag: "mo", output: "⊔", ttype: 0 });
 ```
+
+See [asciimath.org/#syntax](https://asciimath.org/#syntax) for the input
+language reference.
 
 ### LaTeXMathML
 
 ```js
-import { LatexToMathML } from "asciimath/latex";
+import { LatexToMathML, LMprocessNode } from "asciimath/latex";
 
+// Convert a LaTeX string to a MathML string.
 const html = LatexToMathML("\\frac{a}{b}");
+
+// Translate every LaTeX expression inside a subtree in place.
+LMprocessNode(document.getElementById("content"), false);
+```
+
+### ASCIIMath → TeX (image rendering)
+
+`asciimath/tex-img` produces TeX source from ASCIIMath, intended for
+pipelines that render math as images (e.g. via a CGI LaTeX renderer):
+
+```js
+import { AMTparseAMtoTeX, AMTconfig } from "asciimath/tex-img";
+
+// Point at your TeX-to-image endpoint (the original `AMTcgiloc` global).
+globalThis.AMTcgiloc = "https://example.com/cgi-bin/mathtex.cgi";
+
+const tex = AMTparseAMtoTeX("int_0^1 x^2 dx");
+// → "{\\int_{{0}}^{{1}}}{x}^{{2}}{\\left.{d}{x}\\right.}"
 ```
 
 ### MathJax plugin
@@ -64,7 +95,7 @@ const html = LatexToMathML("\\frac{a}{b}");
 ```js
 import { register } from "asciimath/mathjax";
 
-// Call after MathJax has loaded its `InputJax.AsciiMath` slot:
+// Call after MathJax has loaded; `MathJax.InputJax.AsciiMath` must exist.
 register();
 ```
 
@@ -84,11 +115,14 @@ setlistseparator(";");
 ## Development
 
 ```sh
-npm install      # install dev dependencies (TypeScript)
+npm install      # install dev dependencies (TypeScript, jsdom)
 npm run build    # compile src/*.ts to dist/
 npm run check    # type-check without emitting
+npm test         # build, then run the Node test suite
+npm run serve    # build and serve test/index.html via miniserve
 ```
 
-The historical browser test pages in `test/` still reference the legacy
-`ASCIIMathML.js` script in the project root; they are not part of the
-published package.
+The browser test pages in `test/` (`issue*test.html`, `livetest.html`,
+etc.) are smoke-tested headlessly by `test/smoke.test.mjs`: every
+backtick-delimited ASCIIMath expression must parse to a non-empty
+`<math>` node. They are not part of the published package.
